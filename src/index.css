@@ -10,7 +10,3 @@
   display: inline-block;
   background-color: gray;
 }
-
-.cell:hover {
-  background-color: brown;
-}
