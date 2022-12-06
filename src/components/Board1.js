@@ -36,11 +36,16 @@ const Board1 = () => {
   const [highlighted_cells, setHighlighted_cells] = useState([]);
   const [shitIsHovering, setShitIsHovering] = useState(false);
   const [shitsRotated, setShitsRotated] = useState(false);
+  const [placedShits, setPlacedShits] = useState([]);
+
+  useEffect(() => {
+    console.log(placedShits);
+  }, [placedShits])
 
   const cells = board1.cells.map((row, rowIndex) => {
     return (
       row.map((col, colIndex) => {
-        return <Cell key={rowIndex * 10 + colIndex + 101 + shitsRotated} id={rowIndex * 10 + colIndex + 101} shitsRotated={shitsRotated} highlighted_ids={highlighted_cells} shitIsHovering={shitIsHovering} setHighlight_ids={(ids) => setHighlighted_cells(ids)} setShitIsHovering={(bool) => setShitIsHovering(bool)} />;
+        return <Cell key={rowIndex * 10 + colIndex + 100 + shitsRotated} id={rowIndex * 10 + colIndex + 100} shitsRotated={shitsRotated} highlighted_ids={highlighted_cells} shitIsHovering={shitIsHovering} setHighlight_ids={(ids) => setHighlighted_cells(ids)} setShitIsHovering={(bool) => setShitIsHovering(bool)} placedShits={placedShits} setPlacedShits={(addedShit) => setPlacedShits([...placedShits, addedShit])} />;
       })
     );
   });
@@ -50,10 +55,10 @@ const Board1 = () => {
       <div className='board1 flex flex-wrap mx-auto'>
         {cells}
       </div>
-      <button className='rotateShits' type="button" onClick={() => setShitsRotated(!shitsRotated)}>Rotate shits</button>
-      <div className={`board1Shits mt-4 flex ${shitsRotated ? 'flex-row' : 'flex-col'}`}>
+      <button className='rotateShits bg-blue-500 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded m-4' type="button" onClick={() => setShitsRotated(!shitsRotated)}>Rotate shits</button>
+      <div className={`board1Shits mt-4 flex ${shitsRotated ? 'flex-row' : 'flex-col'} border`}>
         {ShitTypes.map(({ name, length, placed }, i) => {
-          return <Shit key={name} name={name} length={length} shitsRotated={shitsRotated} setShitIsHovering={(bool) => setShitIsHovering(bool)} />
+          return <Shit key={name} name={name} length={length} placed={placed} shitsRotated={shitsRotated} setShitIsHovering={(bool) => setShitIsHovering(bool)} />
         })}
       </div>
 
