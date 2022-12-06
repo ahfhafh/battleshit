@@ -10,3 +10,8 @@
   display: inline-block;
   background-color: gray;
 }
+
+.board1, .board2 {
+  width: 400px;
+  height: 400px;
+}
