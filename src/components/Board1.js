@@ -1,31 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Cell from './Cell';
+import Shit from './Shit';
 import { Board } from "../boardhelper";
-import { useDrag } from 'react-dnd';
 
 const ShitTypes = [
   {
-    name: 'carrier',
+    name: 'carrier1',
     length: 5,
     placed: null,
   },
   {
-    name: 'battleship',
+    name: 'battleship1',
     length: 4,
     placed: null,
   },
   {
-    name: 'cruiser',
+    name: 'cruiser1',
     length: 3,
     placed: null,
   },
   {
-    name: 'submarine',
+    name: 'submarine1',
     length: 3,
     placed: null,
   },
   {
-    name: 'destroyer',
+    name: 'destroyer1',
     length: 2,
     placed: null,
   },
@@ -33,37 +33,32 @@ const ShitTypes = [
 
 const Board1 = () => {
   const [board1, setBoard1] = useState(new Board());
+  const [highlighted_cells, setHighlighted_cells] = useState([]);
+  const [shitIsHovering, setShitIsHovering] = useState(false);
+  const [shitsRotated, setShitsRotated] = useState(false);
 
   const cells = board1.cells.map((row, rowIndex) => {
     return (
       row.map((col, colIndex) => {
-        return <Cell key={rowIndex * 10 + colIndex + 101} id={rowIndex * 10 + colIndex + 101} />;
+        return <Cell key={rowIndex * 10 + colIndex + 101 + shitsRotated} id={rowIndex * 10 + colIndex + 101} shitsRotated={shitsRotated} highlighted_ids={highlighted_cells} shitIsHovering={shitIsHovering} setHighlight_ids={(ids) => setHighlighted_cells(ids)} setShitIsHovering={(bool) => setShitIsHovering(bool)} />;
       })
     );
   });
 
-  const [{ isDragging }, dragRef] = useDrag(
-    () => ({
-      type: "ShitTypes.name",
-      collect: (monitor) => ({
-        isDragging: !!monitor.isDragging(),
-      })
-    }),
-    []
-  )
-
-  const shits = ShitTypes.map(({ name, length, placed }, i) => {
-    return (
-      <div id={name} key={name} ref={dragRef} style={{ opacity: isDragging ? 0.5 : 1, border: '1px solid black', cursor: 'move', height: `calc(24rem/10)`, width: `calc(24rem/10*${length})`, backgroundColor: 'pink', }}>
-      </div>
-    )
-  });
-
   return (
-    <div className='board1 flex flex-wrap w-96 h-96 mx-auto'>
-      {cells}
-      {shits}
+    <div>
+      <div className='board1 flex flex-wrap mx-auto'>
+        {cells}
+      </div>
+      <button className='rotateShits' type="button" onClick={() => setShitsRotated(!shitsRotated)}>Rotate shits</button>
+      <div className={`board1Shits mt-4 flex ${shitsRotated ? 'flex-row' : 'flex-col'}`}>
+        {ShitTypes.map(({ name, length, placed }, i) => {
+          return <Shit key={name} name={name} length={length} shitsRotated={shitsRotated} setShitIsHovering={(bool) => setShitIsHovering(bool)} />
+        })}
+      </div>
+
     </div>
+
   );
 }
 
