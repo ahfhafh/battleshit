@@ -1,11 +1,3 @@
-class Shit {
-    constructor(size) {
-        this.size = size;
-        this.markForDeletion = false;
-        this.id = this.id++ || 0;
-    }
-}
-
 class Board {
     constructor() {
         this.cells = [];
@@ -70,4 +62,4 @@ class Board {
     // }
 }
 
-export { Board, Shit };
+export { Board };
