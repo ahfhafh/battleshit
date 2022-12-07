@@ -1,14 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
+import uuid from 'react-uuid';
+import Shit from './Shit';
 
-const Cell = ({ id, shitsRotated, highlighted_ids, setHighlight_ids, shitIsHovering, setShitIsHovering }) => {
+const Cell = ({ id, shitsRotated, highlighted_ids, setHighlight_ids, shitIsHovering, setShitIsHovering, placedShits, setPlacedShits, reportPlacedShits }) => {
 
-    const moveShit = (length, name, initCursorCord, dropResult) => {
-        // determine where cursor is relative to shit
-        // use length and rotation to place in appropriate cells
+    const [position_id_placed, setPosition_id_placed] = useState(0);
+    const [invalidPlacement, setInvalidPlacement] = useState(false)
+
+    const moveShit = (length, name, placed) => {
+        reportPlacedShits();
+        let shitToBeMovedInfo = { location: position_id_placed, name: name, length: length, rotated: shitsRotated, placed: true };
+        // if shit is already one on the board
+        var newPlacedShits = [...placedShits];
+        // if (placed) {
+        //     // remove existing one from placedShits
+        //     newPlacedShits = placedShits.filter((obj) => {
+        //         return obj.name !== name;
+        //     });
+        // }
+        console.log(placedShits)
+        setPlacedShits([...newPlacedShits, shitToBeMovedInfo]);
+    }
+
+    const canDrop = () => {
+        if (invalidPlacement) return false;
+        // if highlighted id intercepts shit already on board
+        return true;
     }
 
     const highlight = (length, initCursorCord, initShitCord) => {
+        setInvalidPlacement(() => false);
         let offset;
         // first = 0
         let position;
@@ -23,21 +45,39 @@ const Cell = ({ id, shitsRotated, highlighted_ids, setHighlight_ids, shitIsHover
         // use length and rotation to highlight appropriate cells
         const arr_highlighted_ids = [];
         for (var i = 0; i < length; i++) {
-            if (shitsRotated) { arr_highlighted_ids.push(id + (i * 10) - (position * 10)) }
-            else { arr_highlighted_ids.push(id + i - position) }
+            if (shitsRotated) {
+                let other_cell_pos = (id + (i * 10) - (position * 10));
+                /* Checking if the highlighted cells go off board on top and bottom */
+                if ((other_cell_pos > 199) || (other_cell_pos < 100)) {
+                    setInvalidPlacement(() => true);
+                }
+                else arr_highlighted_ids.push(other_cell_pos)
+            }
+            else {
+                /* Checking if the highlighted cells are on the same row. */
+                if ((Math.trunc((id + i - position) / 10) % 10) !== Math.trunc((id / 10) % 10)) {
+                    // debugging
+                    setInvalidPlacement(() => true);
+                }
+                else arr_highlighted_ids.push(id + i - position);
+            }
         }
+        if (shitsRotated) setPosition_id_placed(id - (position * 10))
+        else setPosition_id_placed(id - position);
+
         setHighlight_ids(arr_highlighted_ids);
         setShitIsHovering(true);
     }
 
     const [{ isOver }, dropRef] = useDrop(() => ({
         accept: 'shit',
-        drop: (item, monitor) => moveShit(item.length, item.name, monitor.getInitialClientOffset()),
+        drop: (item) => moveShit(item.length, item.name, item.placed),
+        canDrop: (item, monitor) => canDrop(),
         hover: (item, monitor) => highlight(item.length, monitor.getInitialClientOffset(), monitor.getInitialSourceClientOffset()),
         collect: monitor => ({
             isOver: !!monitor.isOver(),
         }),
-    }), [shitsRotated])
+    }), [shitsRotated, position_id_placed])
 
     return <div className="cell" id={id} ref={dropRef}>
         {(isOver || (shitIsHovering && highlighted_ids && highlighted_ids.includes(id))) && (
@@ -53,6 +93,11 @@ const Cell = ({ id, shitsRotated, highlighted_ids, setHighlight_ids, shitIsHover
                 }}
             ></div>
         )}
+        {placedShits && placedShits.map(({ location, name, length, rotated }, i) => {
+            if (location === id)
+                return <Shit key={uuid()} name={name} length={length} placed={true} shitsRotated={rotated} setShitIsHovering={(bool) => setShitIsHovering(bool)} />
+            else return null;
+        })}
     </div>;
 
 }
